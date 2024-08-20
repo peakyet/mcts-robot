@@ -4,6 +4,8 @@
 #include <cmath>
 #include <vector>
 
+#include <iomanip>  // for std::setw and std::setfill
+
 #include "pomcp.hpp"
 #include "env.hpp"
 
@@ -20,10 +22,10 @@ struct Args {
     std::vector<double> resolution = {0.25, 0.25, 0.5, M_PI / 16};
     std::vector<double> limits = {20.0, 20.0, 6.0, 2 * M_PI};
 
-    int maxIter = 1000;
+    int maxIter = 80;
 
     double gamma = 0.95;
-    double c = 10;
+    double c = 5;
     double threshold = 0.7;
     int timeout = 3000;
     int no_particles = 1000;
@@ -42,8 +44,8 @@ void run() {
     }
 
     std::vector<State> states = {
-        State(-10.0, args.boundary[1] + args.road_length / 2, 0.0, 0.0, 1),
-        State(args.boundary[3] - args.road_length / 2, -6, 0.0, M_PI / 2, 2),
+        State(-10.0, args.boundary[1] + args.road_length / 2, 0.0, 0.0, 2),
+        State(args.boundary[3] - args.road_length / 2, -6, 0.0, M_PI / 2, 0),
         State(10, args.boundary[0] - args.road_length / 4, 0.0, M_PI, 1)
     };
 
@@ -172,8 +174,16 @@ void run() {
         plt::xlim(-10, 10);
         plt::ylim(-10, 10);
         plt::set_aspect_equal();
+
+        // 保存帧为PNG文件
+        // std::stringstream ss;
+        // ss << "frame_" << std::setw(4) << std::setfill('0') << i << ".png";
+        // plt::save(ss.str());        
+
         plt::pause(0.01);  // Adjust as needed for simulation speed
+
         // plt::show();
+
 
     }
 }
