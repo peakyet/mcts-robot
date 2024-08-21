@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.10)
 
 # Project name and version
-project(pomcp VERSION 1.0)
+project(mcts VERSION 1.0)
 
 # Set C++ standard
 set(CMAKE_CXX_STANDARD 17)
@@ -29,8 +29,8 @@ set(SOURCES
 )
 
 # Define the executable target
-add_executable(POMCP_Solver ${SOURCES})
-target_link_libraries(POMCP_Solver matplotlib_cpp)
+add_executable(mcts_solver ${SOURCES})
+target_link_libraries(mcts_solver matplotlib_cpp)
 
 # Optional: Add compiler warnings for better code quality
-target_compile_options(POMCP_Solver PRIVATE -Wall -Wextra -Wpedantic)
+target_compile_options(mcts_solver PRIVATE -Wall -Wextra -Wpedantic)
