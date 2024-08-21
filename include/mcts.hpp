@@ -95,10 +95,50 @@ public:
       // }
     }
     // WARN: randomly select intention
-    auto s = Bh.empty() ? states[rand() % states.size()] : Bh[rand() % Bh.size()];
+    // auto s = Bh.empty() ? states[rand() % states.size()] : Bh[rand() % Bh.size()];
+    std::vector<int> s;
+    if (Bh.empty()){
+      s = states[rand() % states.size()];
+    } else {
+      int a0, a1, a2;
+      a0 = a1 = a2 = 0;
+      int maxG = 0;
+      int maxCount = 0;
+      for (int i = 0; i < Bh.size(); i++) {
+        switch (Bh[i][0]) {
+        case 0: {
+          a0++;
+          if (a0 > maxCount){
+            maxG = 0;
+            maxCount = a0;
+          }
+          break;
+        }
+        case 1: {
+          a1++;
+          if (a1 > maxCount){
+            maxG = 1;
+            maxCount = a1;
+          }
+          break;
+        }
+        case 2: {
+          a2++;
+          if (a2 > maxCount){
+            maxG = 2;
+            maxCount = a2;
+          }
+          break;
+        }
+        default:
+          break;
+        }
+      }
+    s.push_back(maxG);    
+    }
     auto [action, _] = SearchBest(0, s[0], false);
 
-    std::cout << "act: " << action << std::endl;
+    std::cout << "g: " << s[0] << ", act: " << action << std::endl;
 
     std::istringstream iss(action);
     int act;

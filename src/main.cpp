@@ -17,17 +17,17 @@ struct Args {
     double width = 2.0;
     double length = 4.0;
 
-    std::vector<double> boundary = {8.0, 2.0, -3.0, 3.0};
+    std::vector<double> boundary = {8.0, 0.0, -4.0, 4.0};
     double road_length = boundary[0] - boundary[1];
     std::vector<double> resolution = {0.25, 0.25, 0.5, M_PI / 16};
     std::vector<double> limits = {20.0, 20.0, 6.0, 2 * M_PI};
 
-    int maxIter = 100;
+    int maxIter = 80;
 
     double gamma = 0.95;
-    double c = 100;
-    double threshold = 0.5;
-    int timeout = 3000;
+    double c = 500;
+    double threshold = 0.6;
+    int timeout = 10000;
     int no_particles = 1000;
 };
 
@@ -45,8 +45,8 @@ void run() {
 
     std::vector<State> states = {
         State(-10.0, args.boundary[1] + args.road_length / 2, 0.0, 0.0, 1),
-        State(args.boundary[3] - args.road_length / 2, -6, 0.0, M_PI / 2, 2),
-        State(10, args.boundary[0] - args.road_length / 4, 0.0, M_PI, 1)
+        State(args.boundary[3] - args.road_length / 2, -6, 0.0, M_PI / 2, 0),
+        State(10, args.boundary[0] - args.road_length / 4, 0.0, M_PI, 0)
     };
 
     for (size_t i = 0; i < cars.size(); ++i) {
@@ -204,9 +204,9 @@ void run() {
         
 
         // 保存帧为PNG文件
-        // std::stringstream ss;
-        // ss << "frame_" << std::setw(4) << std::setfill('0') << i << ".png";
-        // plt::save(ss.str());        
+        std::stringstream ss;
+        ss << "frame_" << std::setw(4) << std::setfill('0') << i << ".png";
+        plt::save(ss.str());        
 
         plt::pause(0.01);  // Adjust as needed for simulation speed
 

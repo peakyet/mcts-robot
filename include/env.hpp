@@ -72,11 +72,11 @@ public:
                 break;
             case LEFT:
                 _act[0] = 0;
-                _act[1] = -M_PI / 4;
+                _act[1] = -M_PI / 8;
                 break;
             case RIGHT:
                 _act[0] = 0;
-                _act[1] = M_PI / 4;
+                _act[1] = M_PI / 8;
                 break;
             default:
                 return false;
@@ -277,9 +277,14 @@ private:
             auto last_dist = std::sqrt(std::pow(last_pos[0] - goal[0], 2) + std::pow(last_pos[1] - goal[1], 2));
             auto cur_dist =  std::sqrt(std::pow(cur_pos[0] - goal[0], 2) + std::pow(cur_pos[1] - goal[1], 2));
 
-            if (cur_dist > 0.6){
+            if (cur_dist > 1){
               if (cur_dist < last_dist) {
-                reward += 40 / cur_dist;
+                  if (i == 0){
+                    reward += 60 / cur_dist;
+                  }
+                  else {
+                      reward += 30 / cur_dist;
+                  }
               } else if (cur_dist >= last_dist) {
                 reward -= 0.1;
               }
@@ -287,7 +292,7 @@ private:
               if (acts[i] != STOP) {
                 reward -= 1;
               } else {
-                  reward += 1;
+                  reward += 0.1;
               }
             }
           if (acts[i] != STOP) {
