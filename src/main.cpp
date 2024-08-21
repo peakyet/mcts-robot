@@ -6,7 +6,7 @@
 
 #include <iomanip>  // for std::setw and std::setfill
 
-#include "pomcp.hpp"
+#include "mcts.hpp"
 #include "env.hpp"
 
 #include <matplotlib-cpp/matplotlibcpp.h>
@@ -22,11 +22,11 @@ struct Args {
     std::vector<double> resolution = {0.25, 0.25, 0.5, M_PI / 16};
     std::vector<double> limits = {20.0, 20.0, 6.0, 2 * M_PI};
 
-    int maxIter = 80;
+    int maxIter = 100;
 
     double gamma = 0.95;
-    double c = 5;
-    double threshold = 0.7;
+    double c = 100;
+    double threshold = 0.5;
     int timeout = 3000;
     int no_particles = 1000;
 };
@@ -44,8 +44,8 @@ void run() {
     }
 
     std::vector<State> states = {
-        State(-10.0, args.boundary[1] + args.road_length / 2, 0.0, 0.0, 2),
-        State(args.boundary[3] - args.road_length / 2, -6, 0.0, M_PI / 2, 0),
+        State(-10.0, args.boundary[1] + args.road_length / 2, 0.0, 0.0, 1),
+        State(args.boundary[3] - args.road_length / 2, -6, 0.0, M_PI / 2, 2),
         State(10, args.boundary[0] - args.road_length / 4, 0.0, M_PI, 1)
     };
 
@@ -60,9 +60,9 @@ void run() {
         gens.emplace_back(args.dt, args.width, args.length, cars.size(), road);
     }
 
-    std::vector<POMCP> pomcps;
+    std::vector<MCTS> mcts;
     for (int i = 0; i < cars.size(); ++i) {
-        pomcps.emplace_back(&gens[i], args.gamma, args.c, args.threshold, args.timeout, args.no_particles);
+        mcts.emplace_back(&gens[i], args.gamma, args.c, args.threshold, args.timeout, args.no_particles);
     }
 
     std::vector<std::vector<int>> S;
@@ -85,8 +85,8 @@ void run() {
         }
     }
 
-    for (int i = 0; i < pomcps.size(); i++) {
-        pomcps[i].initialize(S, A, O);
+    for (int i = 0; i < mcts.size(); i++) {
+        mcts[i].initialize(S, A, O);
     }
 
     // Run environment
@@ -101,12 +101,13 @@ void run() {
     };
 
     cout << "run" << endl;
-
+    // plt::figure();
+    plt::figure_size(1600, 1080);  // 单位为英寸
     for (int i = 0; i < args.maxIter; ++i) {
         // Search action
         std::vector<int> actions;
         for (int j = 0; j < cars.size(); ++j) {
-            actions.push_back(pomcps[j].Search(cur_state[j]));
+            actions.push_back(mcts[j].Search(cur_state[j]));
         }
         // actions[0] = 1;
 
@@ -144,19 +145,22 @@ void run() {
             std::to_string(actions[1]) + " " + std::to_string(actions[0]),
         };
 
-        for (int j = 0; j < pomcps.size(); ++j) {
-            pomcps[j].UpdateBelief(act_str[j], next_obs[j]);
+        std::vector<std::vector<double>> Pr;
+        for (int j = 0; j < mcts.size(); ++j) {
+            Pr.push_back(mcts[j].UpdateBelief(act_str[j], next_obs[j]));
         }
 
         cur_state = next_state;
        
         // Plotting code
         plt::cla();
+        plt::subplot2grid(2,3, 0, 0, 2, 2 );
         road.draw();
 
         for (int j = 0; j < 3; j++){
             auto goal = road.get_goal(j);
-            plt::plot({goal[0]}, {goal[1]}, {{"marker", "x"}, {"color", "green"}});
+            // plt::plot({goal[0]}, {goal[1]}, {{"marker", std::to_string(j)}, {"color", "green"}});
+            plt::text(goal[0], goal[1], std::to_string(j), {{"color", "green"}, {"fontsize", "20"}});
         }
 
         for (int j = 0; j < cars.size(); ++j) {
@@ -166,14 +170,38 @@ void run() {
             // Example drawing for each car
             // plt::plot({car_state.x}, {car_state.y}, {{"marker", "o"}, {"color", "blue"}});
             cars[j].draw();
-            plt::text(car_state.x, car_state.y, "Robot");
+            plt::text(car_state.x, car_state.y, "Robot_" + std::to_string(j));
 
             std::cout << "x: " << car_state.x << ", y: " << car_state.y << ", theta: "<< car_state.theta<< ", g: " << car_state.g << std::endl;
         }
 
         plt::xlim(-10, 10);
         plt::ylim(-10, 10);
+        plt::title("Simulation");
+        plt::xlabel("x");
+        plt::xlabel("y");
         plt::set_aspect_equal();
+
+        // plt::subplot2grid({2,3},{0,2});
+        std::vector<int> intentions = {0, 1, 2};
+        plt::subplot2grid(2,3,0,2);
+        plt::bar(Pr[0]);
+        plt::title("Probability of Robot_1's intention");
+        plt::xlim(-1,3);
+        plt::ylim(0, 1);
+        plt::xticks(intentions);
+        plt::xlabel("Intention");
+        plt::ylabel("Pr");
+
+        plt::subplot2grid(2,3,1,2);
+        plt::title("Probability of Robot_0's intention");
+        plt::bar(Pr[1]);
+        plt::xlim(-1,3);
+        plt::ylim(0, 1);
+        plt::xticks(intentions);
+        plt::xlabel("Intention");
+        plt::ylabel("Pr");
+        
 
         // 保存帧为PNG文件
         // std::stringstream ss;

@@ -277,15 +277,17 @@ private:
             auto last_dist = std::sqrt(std::pow(last_pos[0] - goal[0], 2) + std::pow(last_pos[1] - goal[1], 2));
             auto cur_dist =  std::sqrt(std::pow(cur_pos[0] - goal[0], 2) + std::pow(cur_pos[1] - goal[1], 2));
 
-            if (cur_dist > 0.5){
+            if (cur_dist > 0.6){
               if (cur_dist < last_dist) {
-                reward += 2 / cur_dist;
+                reward += 40 / cur_dist;
               } else if (cur_dist >= last_dist) {
                 reward -= 0.1;
               }
             } else {
               if (acts[i] != STOP) {
                 reward -= 1;
+              } else {
+                  reward += 1;
               }
             }
           if (acts[i] != STOP) {
@@ -311,12 +313,12 @@ private:
             }
 
             if (col) {
-                reward -= 10;
+                reward -= 20;
             }
 
             // road
             if (road_env.out_road(s[i])) {
-                reward -= 10;
+                reward -= 20;
             }
         }
 

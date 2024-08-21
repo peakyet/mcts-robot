@@ -13,8 +13,8 @@
 struct Node {
     int parent;
     std::unordered_map<std::string, unsigned int> children;
-    int Nc;
-    double V;
+    std::vector<int> Nc;
+    std::vector<double> V;
     std::vector<std::vector<int>> Bh;
 };
 
@@ -26,8 +26,11 @@ public:
 
         Node initialNode;
         initialNode.parent = count;
-        initialNode.Nc = 0;
-        initialNode.V = -10000;
+
+        // WARN: special case, three intention
+        initialNode.Nc = {0, 0, 0};
+        initialNode.V = {0, 0, 0};
+
         initialNode.children.clear();
         initialNode.Bh.clear();
 
@@ -39,8 +42,8 @@ public:
         count++;
         Node newNode;
         newNode.parent = parent;
-        newNode.Nc = 0;
-        newNode.V = 0;
+        newNode.Nc = {0, 0, 0};
+        newNode.V = {0, 0, 0};
         newNode.children.clear();
         newNode.Bh.clear();
      
@@ -49,26 +52,28 @@ public:
 
     }
 
-    bool isLeafNode(const unsigned int & n) const {
+    bool isLeafNode(const unsigned int & n, const int & g) const {
         const Node& node = nodes.at(n);
-        return node.Nc == 0;
+        return node.Nc[g] == 0;
     }
 
-    int getObservationNode(const unsigned int & h, const std::string& sample_observation) {
+    int getObservationNode(const unsigned int &h, const std::string &act_obs) {
+      if (nodes.find(h) == nodes.end()) {
+        throw std::runtime_error("Invalid node index: " + std::to_string(h));
+      }
 
-        if (nodes.find(h) == nodes.end()) {
-                throw std::runtime_error("Invalid node index: " + std::to_string(h));
-            }
+      auto &children = nodes[h].children;
 
-            std::unordered_map<std::string, unsigned int> & children = nodes[h].children;
-
-            if (children.count(sample_observation) == 0) {
-                ExpandTreeFrom(h, sample_observation);
-            }
-            return children[sample_observation];
+      if (children.count(act_obs) == 0) {
+        ExpandTreeFrom(h, act_obs);
+      }
+      return children[act_obs];
     }
 
     void prune(const unsigned int & node) {
+        if (nodes.count(node) == 0){
+            return;
+        }
         const auto& children = nodes[node].children;
         nodes.erase(node);
         for (const auto& [_, child] : children) {
@@ -86,10 +91,10 @@ public:
     }
 
     void prune_after_action(const std::string& action, const std::string& observation) {
-        auto action_node = nodes[0].children[action];
-        auto new_root = getObservationNode(action_node, observation);
+        auto ha = nodes[0].children[action];
+        auto new_root = getObservationNode(ha, observation);
 
-        nodes[action_node].children.erase(observation);
+        nodes[ha].children.erase(observation);
 
         prune(0);
 
