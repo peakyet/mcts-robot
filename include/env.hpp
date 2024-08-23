@@ -116,7 +116,7 @@ public:
         return true;
     }
 
-    void draw(){
+    void draw(std::string color="blue"){
         std::vector<std::vector<double>> points = {{length / 2.0, width / 2.0}, {-length / 2.0, width / 2.0},
                                                     {-length / 2.0, -width / 2.0}, {length / 2.0, -width / 2.0}};
         for (int i = 0; i < 4; i++){
@@ -125,7 +125,7 @@ public:
             points[i][0] = ne_x;
         }
         plt::plot({points[0][0], points[1][0], points[2][0], points[3][0], points[0][0]},
-                    {points[0][1], points[1][1], points[2][1], points[3][1], points[0][1]}, {{"color", "blue"}});
+                    {points[0][1], points[1][1], points[2][1], points[3][1], points[0][1]}, {{"color", color}});
 
            
     }

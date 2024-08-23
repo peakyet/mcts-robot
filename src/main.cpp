@@ -103,11 +103,16 @@ void run() {
     cout << "run" << endl;
     // plt::figure();
     plt::figure_size(1600, 1080);  // 单位为英寸
+    std::vector<std::vector<std::vector<double>>> car_traj(cars.size(), std::vector<std::vector<double>>(2, std::vector<double>()));
     for (int i = 0; i < args.maxIter; ++i) {
         // Search action
         std::vector<int> actions;
         for (int j = 0; j < cars.size(); ++j) {
             actions.push_back(mcts[j].Search(cur_state[j]));
+
+            // append state
+            car_traj[j][0].push_back(cur_state[j][0].x);
+            car_traj[j][1].push_back(cur_state[j][0].y);
         }
         // actions[0] = 1;
 
@@ -169,7 +174,14 @@ void run() {
 
             // Example drawing for each car
             // plt::plot({car_state.x}, {car_state.y}, {{"marker", "o"}, {"color", "blue"}});
-            cars[j].draw();
+            std::string car_color;
+            if (j == 0){
+                car_color = "blue";
+            } else if (j == 1){
+                car_color = "m";
+            }
+            cars[j].draw(car_color);
+            plt::plot(car_traj[j][0], car_traj[j][1], {{"color", car_color}});
             plt::text(car_state.x, car_state.y, "Robot_" + std::to_string(j));
 
             std::cout << "x: " << car_state.x << ", y: " << car_state.y << ", theta: "<< car_state.theta<< ", g: " << car_state.g << std::endl;
