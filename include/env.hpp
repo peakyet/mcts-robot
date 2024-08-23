@@ -318,7 +318,7 @@ private:
             }
 
             if (col) {
-                reward -= 20;
+                reward -= 100;
             }
 
             // road

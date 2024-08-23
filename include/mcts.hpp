@@ -59,10 +59,32 @@ public:
         }
       }
     } else {
+
+      // WARN: randomly select intention
+      // auto s = Bh.empty() ? states[rand() % states.size()] : Bh[rand() % Bh.size()];
+      const auto & Bh = tree.nodes[h].Bh;
+      std::vector<double> pr(states.size(), 1.0 / states.size());
+      if (!Bh.empty()) {
+        std::vector<int> particles(states.size(), 0);
+        for (int i = 0; i < Bh.size(); i++) {
+          particles[Bh[i][0]]++;
+        }
+
+        for (size_t i = 0; i < states.size(); i++){
+          pr[i] = static_cast<double>(particles[i]) / Bh.size();
+        }
+      }
       for (const auto &[action, child] : tree.nodes[h].children) {
-        // std::cout << "action: " << action << ", Nc: " << tree.nodes[child].Nc[g] << ", V: " << tree.nodes[child].V[g] << std::endl;
-        double node_value = tree.nodes[child].V[g];
-        int node_Nc = tree.nodes[child].Nc[g];
+        // std::cout << "action: " << action << ", Nc: " <<
+        // tree.nodes[child].Nc[g] << ", V: " << tree.nodes[child].V[g] <<
+        // std::endl;
+        double node_value = 0;
+        int node_Nc = 0;
+        for (int i = 0; i < pr.size(); i++){
+          node_value += tree.nodes[child].V[i] * pr[i];
+          node_Nc += tree.nodes[child].Nc[i];
+        }
+
         if (max_value < node_value) {
           max_value = node_value;
           result = child;
@@ -94,51 +116,9 @@ public:
       //   std::cout << "action2: " << action << "value: " << node_value << std::endl;
       // }
     }
-    // WARN: randomly select intention
-    // auto s = Bh.empty() ? states[rand() % states.size()] : Bh[rand() % Bh.size()];
-    std::vector<int> s;
-    if (Bh.empty()){
-      s = states[rand() % states.size()];
-    } else {
-      int a0, a1, a2;
-      a0 = a1 = a2 = 0;
-      int maxG = 0;
-      int maxCount = 0;
-      for (int i = 0; i < Bh.size(); i++) {
-        switch (Bh[i][0]) {
-        case 0: {
-          a0++;
-          if (a0 > maxCount){
-            maxG = 0;
-            maxCount = a0;
-          }
-          break;
-        }
-        case 1: {
-          a1++;
-          if (a1 > maxCount){
-            maxG = 1;
-            maxCount = a1;
-          }
-          break;
-        }
-        case 2: {
-          a2++;
-          if (a2 > maxCount){
-            maxG = 2;
-            maxCount = a2;
-          }
-          break;
-        }
-        default:
-          break;
-        }
-      }
-    s.push_back(maxG);    
-    }
-    auto [action, _] = SearchBest(0, s[0], false);
+    auto [action, _] = SearchBest(0, -1, false);
 
-    std::cout << "g: " << s[0] << ", act: " << action << std::endl;
+    // std::cout << "g: " << s[0] << ", act: " << action << std::endl;
 
     std::istringstream iss(action);
     int act;

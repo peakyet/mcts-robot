@@ -26,7 +26,7 @@ struct Args {
 
     double gamma = 0.95;
     double c = 500;
-    double threshold = 0.6;
+    double threshold = 0.7;
     int timeout = 10000;
     int no_particles = 1000;
 };
@@ -44,9 +44,9 @@ void run() {
     }
 
     std::vector<State> states = {
-        State(-10.0, args.boundary[1] + args.road_length / 2, 0.0, 0.0, 1),
-        State(args.boundary[3] - args.road_length / 2, -6, 0.0, M_PI / 2, 0),
-        State(10, args.boundary[0] - args.road_length / 4, 0.0, M_PI, 0)
+        State(-10.0, args.boundary[1] + args.road_length / 2, 0.0, 0.0, 2),
+        // State(args.boundary[3] - args.road_length / 2, -6, 0.0, M_PI / 2, 0),
+        State(10, args.boundary[0] - args.road_length / 2, 0.0, M_PI, 1)
     };
 
     for (size_t i = 0; i < cars.size(); ++i) {
