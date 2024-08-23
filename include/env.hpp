@@ -247,12 +247,40 @@ public:
         std::vector<State> last_state;
         last_state = states;
 
+        // if car0 has collision with any cars, reward - 100;
+        std::vector<State> tmp_s = states;
+
         for (size_t i = 0; i < sim_cars.size(); ++i) {
             sim_cars[i].step(states[i], acts[i]);
         }
 
         obs_index = road_env.get_index(states);
         reward = get_reward(states, acts, last_state);
+
+        // WARN: 保守奖励
+        // bool hasCollision = false;
+        // for (int i = 1; i < sim_cars.size(); i++){
+        //     auto ttmp_s = tmp_s[i];
+        //     for (int j = 0; j < 5; j++){
+        //         if (j == acts[i]){
+        //             continue;
+        //         }
+
+        //         sim_cars[i].step(ttmp_s, j);
+
+        //       // AABB (Axis-Aligned Bounding Box) collision detection
+        //       double dx = fabs(states[0].x - ttmp_s.x);
+        //       double dy = fabs(states[0].y - ttmp_s.y);
+
+        //       if (dx < sim_cars[0].length && dy < sim_cars[0].width) {
+        //         // std::cout << "collision\n";
+        //         hasCollision = true;
+        //         break;
+        //       }
+        //     }
+        //     if (hasCollision) break;
+        // }
+        // if (hasCollision) reward -= 100;
 
         return true;
     }
@@ -313,6 +341,7 @@ private:
               if (dx < sim_cars[i].length && dy < sim_cars[i].width) {
                 // std::cout << "collision\n";
                 col = true;
+                break;
               }
             }
             }

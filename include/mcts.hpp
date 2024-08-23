@@ -3,6 +3,7 @@
 
 #include "auxilliary.hpp"
 #include "env.hpp" // Assuming this contains the State, Car, and other related classes
+#include <algorithm>
 #include <cmath>
 #include <ctime>
 #include <random>
@@ -74,16 +75,24 @@ public:
           pr[i] = static_cast<double>(particles[i]) / Bh.size();
         }
       }
+
+      int max_g = std::max_element(pr.begin(), pr.end()) - pr.begin();
       for (const auto &[action, child] : tree.nodes[h].children) {
         // std::cout << "action: " << action << ", Nc: " <<
         // tree.nodes[child].Nc[g] << ", V: " << tree.nodes[child].V[g] <<
         // std::endl;
         double node_value = 0;
         int node_Nc = 0;
+
+        // WARN: use contingency
         for (int i = 0; i < pr.size(); i++){
           node_value += tree.nodes[child].V[i] * pr[i];
           node_Nc += tree.nodes[child].Nc[i];
         }
+
+        // WARN: use max
+        // node_value = tree.nodes[child].V[max_g];
+        // node_Nc = tree.nodes[child].Nc[max_g];
 
         if (max_value < node_value) {
           max_value = node_value;
